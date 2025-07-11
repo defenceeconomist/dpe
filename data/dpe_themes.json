@@ -1,0 +1,100 @@
+{
+  "core_themes": [
+    {
+      "theme": "Conflict & Civil Wars",
+      "description": "Analyses on internal armed conflicts, causes, dynamics, and impacts on economies and societies."
+    },
+    {
+      "theme": "Defence and the Economy",
+      "description": "Studies on the relationship between defence spending and macroeconomic performance, including growth, debt, and inflation."
+    },
+    {
+      "theme": "Terrorism",
+      "description": "Economic perspectives on terrorism, including impacts, counterterror strategies, and group behaviour."
+    },
+    {
+      "theme": "Defence Policies, Planning & Management",
+      "description": "Examination of national defence policies, strategic planning, and defence governance structures."
+    },
+    {
+      "theme": "Military Personnel & Recruitment",
+      "description": "Research on military labour markets, conscription vs. volunteer forces, and human capital issues."
+    },
+    {
+      "theme": "Models of Defence Expenditures",
+      "description": "Theoretical and empirical models explaining variations in military spending across countries and time."
+    },
+    {
+      "theme": "Security Economics / Issues",
+      "description": "Broader security-related economics, e.g. geopolitical risk, sanctions, piracy, and transnational policing."
+    },
+    {
+      "theme": "Defence Industries & Industrial Base",
+      "description": "Industry-level analysis of defence manufacturers, R&D, market structures, and industrial policy."
+    },
+    {
+      "theme": "Fiscal (& Budgetary) Effects of Defence Spending",
+      "description": "Studies on how military spending affects public finances, deficits, and tax burdens."
+    },
+    {
+      "theme": "Arms Races, Arms Control & Disarmament",
+      "description": "Research on competitive military buildups, treaties, disarmament dynamics and strategic equilibria."
+    }
+  ],
+  "other_notable_themes": [
+    {
+      "theme": "Economics of Alliances",
+      "description": "Analyses of alliance burden-sharing, public goods models of NATO, and alliance stability."
+    },
+    {
+      "theme": "Defence R&D and Technology",
+      "description": "The economics of innovation in the defence sector, including technological change and procurement."
+    },
+    {
+      "theme": "Arms Trade (& Production)",
+      "description": "Studies on the trade, supply chains, and regulatory dynamics of international arms markets."
+    },
+    {
+      "theme": "Country Surveys",
+      "description": "In-depth economic reviews of defence sectors in specific countries."
+    },
+    {
+      "theme": "Regional Economics & Defence",
+      "description": "Spatial distribution and local economic impact of defence spending and installations."
+    },
+    {
+      "theme": "Company Surveys",
+      "description": "Case studies of major defence firms (e.g., BAE Systems, Finmeccanica) and their market behaviour."
+    },
+    {
+      "theme": "Peace and Peacekeeping",
+      "description": "Analyses of UN and non-UN peacekeeping missions, costs, outcomes, and deployment patterns."
+    },
+    {
+      "theme": "Public Choice & Defence",
+      "description": "The application of public choice theory to defence decision-making and lobbying."
+    }
+  ],
+  "emerging_themes": [
+    {
+      "theme": "Climate Change and Security",
+      "description": "Exploring links between environmental change, conflict, migration, and defence readiness."
+    },
+    {
+      "theme": "Private Military Companies",
+      "description": "Economic analysis of the role and regulation of private security providers."
+    },
+    {
+      "theme": "Cybersecurity and Intelligence",
+      "description": "Economics of information warfare, surveillance, and cyber-deterrence."
+    },
+    {
+      "theme": "Autonomous Military Systems",
+      "description": "Resource allocation, ethics, and procurement challenges in AI-driven military tech."
+    },
+    {
+      "theme": "Spatial Economics of Conflict and Terrorism",
+      "description": "Using spatial econometrics to examine how geography influences conflict patterns."
+    }
+  ]
+}
