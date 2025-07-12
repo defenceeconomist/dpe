@@ -8,3 +8,7 @@
 ## usethis namespace: start
 ## usethis namespace: end
 NULL
+
+.onAttach <- function(libname, pkgname) {
+  packageStartupMessage("Run setup_python_env() before running `py_pdf_blocks` or `py_count_tokens`.")
+}

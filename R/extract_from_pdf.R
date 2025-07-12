@@ -1,11 +1,38 @@
-
-#' Process DPE
-#' 
-#' Gadet to upload PDF files and return the aims, data, methods, findings, conclusions, doi, keywords and JEL codes.
-#' 
+#' Interactive PDF Extractor for DPE Summaries
+#'
+#' Launches a Shiny gadget to upload and process academic PDFs related to
+#' Defence and Peace Economics (DPE). It extracts structured metadata
+#' including aims, data, methods, findings, conclusions, keywords, DOI,
+#' JEL codes, and themes using a large language model.
+#'
+#' @details
+#' The gadget:
+#' \itemize{
+#'   \item Accepts multiple PDF files.
+#'   \item Uses Python functions (`py_pdf_blocks`, `py_count_tokens`) to extract raw content.
+#'   \item Applies an OpenAI GPT model via the `ellmer` package to extract structured fields.
+#'   \item Automatically checks for token limits and alerts the user if exceeded.
+#'   \item Displays a reactive summary table and allows the result to be downloaded as CSV.
+#' }
+#'
+#' Requires a working Python environment and properly configured `reticulate`, `ellmer`, and `dpe` packages.
+#'
+#' @note 
+#' Files exceeding 100,000 tokens will not be processed.
+#'
+#' @return
+#' A `tibble` containing the extracted data, returned when the gadget is closed with the "Done" button.
+#'
+#' @import shiny miniUI DT dplyr purrr stringr glue ellmer dpe
 #' @export
-process_dpe_gadget <- function(){
+#'
+#' @examples
+#' \dontrun{
+#' extract_from_pdf()
+#' }
+extract_from_pdf <- function(){
 
+  setup_python_env()
   TOKEN_LIMIT = 100e3
   options(shiny.maxRequestSize = 30 * 1024^2)
 
