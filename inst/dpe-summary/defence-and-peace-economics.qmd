@@ -10,17 +10,24 @@ server: shiny
 library(shiny)
 library(reactable)
 library(shinyWidgets)
+library(dpe)
 
+data(dpe_vol_35)
+data(dpe_themes)
+
+author <- dpe_vol_35 |>
+  dplyr::select(doi, author) |>
+  tidyr::unnest(author) |>
+  dplyr::group_by(doi) |>
+  dplyr::summarise(author = paste(glue::glue("{given} {family}"), collapse = ", "))
+
+dpe_vol_35_2 <- dpe_vol_35 |>
+  dplyr::select(-author) |>
+  dplyr::left_join(author, by = "doi")
 ```
 
-```{r}
-dpe_themes <- jsonlite::read_json("../../data/dpe_themes.json") |>
-  purrr::flatten() |>
-  purrr::map_chr(~.x$theme)
 
-```
-
-# {.sidebar}
+#  {.sidebar}
 
 ```{r}
 shinyWidgets:::html_dependency_picker_bs(theme = bslib::bs_theme(version = 5))
@@ -28,7 +35,8 @@ tags$br()
 shinyWidgets::pickerInput(
   inputId = "theme",
   label = "Theme",
-  choices  = dpe_themes,
+  choices  = dpe_themes$theme,
+  selected = dpe_themes$theme,
   multiple = TRUE,
   options = pickerOptions(
     container = "body", 
@@ -45,38 +53,21 @@ shinyWidgets::pickerInput(
 uiOutput("reactable_ui")
 ```
 
-
 ```{r}
 #| context: server
-dpe_detail_df <- readr::read_csv(
-  "../../data/2024_35_1_results.csv",
-  show_col_types = FALSE
-)
-
-dpe_meta_df <- readr::read_csv(
-  "../../data/defpea_repec.csv",
-  show_col_types = FALSE
-)
-
-dpe_df <- dpe_detail_df |>
-  dplyr::left_join(dpe_meta_df, 
-                   by = c("doi" = "X-DOI"))
-
-
-
 dataset <- reactive({
   
-  dpe_df <- dpe_df |>
+  dpe_df <- dpe_vol_35_2 |>
       dplyr::filter(primary_theme %in% input$theme |
                     secondary_theme %in% input$theme)
   
   list(
     meta = dpe_df |>
       dplyr::select(
-        "Title", "Author-Name", "Year", "Pages", "Issue", "Volume", "File-URL"
+        "title", "author", "volume", "issue", "page_start", "page_end", "url"
         ),
      detail = dpe_df |>
-      dplyr::select(aims, data, methods, findings, conclusions, primary_theme, secondary_theme)
+      dplyr::select(aims, data, methods, findings, conclusions, primary_theme, secondary_theme, keywords, jel)
        )
  
 })
@@ -99,10 +90,10 @@ row_details <- function(index){
 
 output$reactable <- renderReactable({
   reactable(
-    data = dataset()$meta |> dplyr::select(-`File-URL`), 
+    data = dataset()$meta |> dplyr::select(-url), 
     columns = list(
-      Title = colDef(cell = function(value, index){
-        url <- dataset()$meta[index, "File-URL"] |> dplyr::pull()
+      title = colDef(cell = function(value, index){
+        url <- dataset()$meta[index, "url"] |> dplyr::pull()
         htmltools::tags$a(href = url, target = "_blank", value)
         }, minWidth = 300)
       ),

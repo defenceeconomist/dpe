@@ -137,10 +137,19 @@ server <- function(input, output, session) {
       type = schema
     )
     
-    results_df$doi <- purrr::map_chr(pdf_data, ~.x$doi)
-    results_df$keywords <- purrr::map_chr(pdf_data, ~.x$keywords)
-    results_df$jel <- purrr::map_chr(pdf_data, ~ifelse(is.null(.x$jel), NA, .x$jel))
     
+    results_df$doi <- purrr::map_chr(pdf_data, ~{
+    if (length(.x$doi) == 0) NA_character_ else .x$doi
+    })
+
+    results_df$keywords <- purrr::map_chr(pdf_data, ~{
+    if (length(.x$keywords) == 0) NA_character_ else .x$keywords
+    })
+
+    results_df$jel <- purrr::map_chr(pdf_data, ~{
+    if (length(.x$jel) == 0) NA_character_ else .x$jel
+    })
+
     
     values$dataset <- results_df
     

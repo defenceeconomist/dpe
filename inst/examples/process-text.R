@@ -1,23 +1,19 @@
-library(reticulate)
-
-# load R and python functions
-for (file in list.files("py")) source_python(file.path("inst/python", file))
-for (file in list.files("R")) source(file.path("R", file))
-
+library(dpe)
+library(ellmer)
+setup_python_env()
 
 # load and process data in folder
-dir <- "data-raw/onedrive/2024 35 1/"
+dir <- "data-raw/vol-35-pdfs/2024 35 7/"
 pdf_data <- file.path(dir, list.files(dir)) |>
   purrr::map(~{
-    pdf_data <- extract_blocks(.x) |> process_blocks() 
+    pdf_data <- py_pdf_blocks(.x) |> process_blocks() 
     append(
       pdf_data, list(
         tokens = purrr::pluck(pdf_data, "full_text") |>
-          count_tokens())
+          py_count_tokens())
       )
   })
 
-txt <- pdf_data[[1]]$full_text
 txt_list <- purrr::map(pdf_data, ~.x$full_text)
 
 # count the number of tokens
@@ -69,20 +65,22 @@ schema <- type_object(
   )
 )
 
-result <- chat$chat_structured(
-  txt,
-  type = schema,
-  echo = "none",
-  convert = TRUE
-)
-
 results_df <- parallel_chat_structured(
   chat,
   txt_list,
   type = schema
 )
 
-results_df$doi <- purrr::map_chr(pdf_data, ~.x$doi)
-results_df$keywords <- purrr::map_chr(pdf_data, ~.x$keywords)
-results_df$jel <- purrr::map_chr(pdf_data, ~ifelse(is.null(.x$jel), NA, .x$jel))
-write.csv(results_df, "data/2024_35_1_results.csv", row.names = FALSE)
+results_df$doi <- purrr::map_chr(pdf_data, ~{
+if (length(.x$doi) == 0) NA_character_ else .x$doi
+})
+
+results_df$keywords <- purrr::map_chr(pdf_data, ~{
+if (length(.x$keywords) == 0) NA_character_ else .x$keywords
+})
+
+results_df$jel <- purrr::map_chr(pdf_data, ~{
+if (length(.x$jel) == 0) NA_character_ else .x$jel
+})
+
+write.csv(results_df, "data-raw/dpe-summary/2024_35_7_results.csv", row.names = FALSE)

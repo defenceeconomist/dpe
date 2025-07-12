@@ -1,12 +1,22 @@
 Package: dpe
-Title: What the Package Does (One Line, Title Case)
+Title: Automatic Evidence Synthesis from the Journal of Defence and Peace Economics
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
+    person("Luke", "Heley", , "lajh87@me.com", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+Description: This package extracts the aims, data, methods, findings and conclusions from journal article pdfs.
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
+Imports: 
+    dplyr,
+    ellmer,
+    reactable,
+    reticulate,
+    shinyWidgets,
+    tidyr
+Depends: 
+    R (>= 3.5)
+LazyData: true

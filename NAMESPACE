@@ -3,3 +3,4 @@
 export(process_blocks)
 export(py_count_tokens)
 export(py_pdf_blocks)
+export(setup_python_env)

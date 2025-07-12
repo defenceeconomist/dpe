@@ -1,4 +1,0 @@
-pymupdf
-tiktoken
-openai
-python-dotenv
