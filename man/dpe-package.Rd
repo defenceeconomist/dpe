@@ -9,7 +9,7 @@
 Automated evidence synthesis from the journal of defence and peace economics.
 }
 \author{
-\strong{Maintainer}: Luke Heley \email{lajh87@me.com} (\href{https://orcid.org/YOUR-ORCID-ID}{ORCID})
+\strong{Maintainer}: Luke Heley \email{lajh87@me.com}
 
 }
 \keyword{internal}

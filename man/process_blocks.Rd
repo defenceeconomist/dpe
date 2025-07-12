@@ -2,10 +2,39 @@
 % Please edit documentation in R/extract_from_pdf.R
 \name{process_blocks}
 \alias{process_blocks}
-\title{Process PDF data}
+\title{Process Extracted PDF Blocks into Structured Metadata}
 \usage{
 process_blocks(pdf_blocks)
 }
+\arguments{
+\item{pdf_blocks}{A list of named lists or tibbles, where each element represents a block of text from a page in a PDF document. Each block must include at least \code{page} and \code{content} fields.}
+}
+\value{
+A named list with the following elements:
+\describe{
+\item{doi}{A character string containing the document DOI (or \code{NA} if not found).}
+\item{jel}{A character string of JEL classification codes (or \code{NA}).}
+\item{keywords}{A character string of keywords (or \code{NA}).}
+\item{full_text}{A single string containing the cleaned full text content of the document body.}
+}
+}
 \description{
-Extract data from pdf.
+Converts a list of text blocks (typically extracted from a PDF using a tool like \code{py_pdf_blocks}) into structured metadata fields: DOI, JEL codes, keywords, and full text.
+}
+\details{
+This function:
+\itemize{
+\item Parses the DOI from page 0 using a regex pattern that detects standard DOI formats.
+\item Extracts JEL classification codes and keywords from page 1.
+\item Removes headers and footers from body pages to produce a clean \code{full_text} field.
+\item Normalises line breaks within paragraphs by replacing \verb{\\n} followed by a lowercase letter with a space.
+}
+}
+\examples{
+\dontrun{
+blocks <- py_pdf_blocks("paper.pdf")
+result <- process_blocks(blocks)
+result$doi
+result$full_text
+}
 }

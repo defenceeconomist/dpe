@@ -6,9 +6,17 @@
 \usage{
 py_pdf_blocks(filepath)
 }
+\arguments{
+\item{filepath}{path to pdf file}
+}
+\value{
+pdf text
+}
 \description{
 Use pymupdf to extract text blocks from pdf document
 }
 \examples{
-py_pdf_blocks("data-raw/onedrive/2024 35 2/00-Prospects of Deterrence_ Deterrence Theory_ Representation and Evidence.pdf")
+\dontrun{
+  py_pdf_blocks("paper.pdf")
+}
 }

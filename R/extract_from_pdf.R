@@ -23,7 +23,6 @@
 #' @return
 #' A `tibble` containing the extracted data, returned when the gadget is closed with the "Done" button.
 #'
-#' @import shiny miniUI DT dplyr purrr stringr glue ellmer dpe
 #' @export
 #'
 #' @examples
@@ -45,7 +44,7 @@ extract_from_pdf <- function(){
         multiple = TRUE, 
         accept = "application/pdf"
       ),
-      DT::DTOutput("table")
+      shiny::dataTableOutput("table")
     ),
     miniUI::miniButtonBlock(
       shiny::downloadButton("download")
@@ -74,12 +73,12 @@ extract_from_pdf <- function(){
       shiny::stopApp(returnValue)
     })
 
-    output$table <- DT::renderDataTable(values$dataset)
+    output$table <- shiny::renderDataTable(values$dataset)
     
     # loop through the uploaded data files and 
     # extract the doi, jel, keywords, full_text
     # and count the tokens in full_text.
-    observeEvent(input$upload,{
+    shiny::observeEvent(input$upload,{
 
     pdf_data <- purrr::pmap(
       list(datapath = input$upload$datapath, 
@@ -110,7 +109,7 @@ extract_from_pdf <- function(){
         "have exceeded the token limit of {TOKEN_LIMIT}. "
         )
       
-      return(showModal(modalDialog(
+      return(shiny::showModal(shiny::modalDialog(
         title = "Error: Token Limit Exceeded",
         error_msg
       )))
@@ -182,7 +181,7 @@ extract_from_pdf <- function(){
       glue::glue("{today}-dpe-summary.csv")
     }, 
     content = function(file){
-      write.csv(values$dataset, file, row.names = FALSE)
+      utils::write.csv(values$dataset, file, row.names = FALSE)
     }
   )
     
@@ -194,7 +193,14 @@ extract_from_pdf <- function(){
 #' 
 #' Use pymupdf to extract text blocks from pdf document
 #' 
-#'@examples py_pdf_blocks("data-raw/onedrive/2024 35 2/00-Prospects of Deterrence_ Deterrence Theory_ Representation and Evidence.pdf")
+#' @param filepath path to pdf file
+#' 
+#' @return pdf text
+#' 
+#'@examples
+#' \dontrun{
+#'   py_pdf_blocks("paper.pdf")
+#' }
 #'@export
 py_pdf_blocks <- function(filepath){
   reticulate::source_python(system.file("python/process_article.py", package = "dpe"))
@@ -202,25 +208,65 @@ py_pdf_blocks <- function(filepath){
 }
 
 
-#' Count Tokens
-#' 
-#' Use python tiktoken package to count the tokens in full text for a given model
-#' 
-#'@examples
-#' py_pdf_blocks("data-raw/onedrive/2024 35 2/00-Prospects of Deterrence_ Deterrence Theory_ Representation and Evidence.pdf") |>
+#' Count Tokens in Text Using Python's `tiktoken`
+#'
+#' Counts the number of tokens in a given text string using the `tiktoken` Python package. This is useful for estimating token usage when interacting with language models such as GPT-4.
+#'
+#' @param x A character string. The text for which token count should be calculated.
+#'
+#' @details
+#' This function acts as a wrapper for a Python function `count_tokens()` defined in `count_tokens.py`, which must be located in the `inst/python/` directory of the `dpe` package. The Python script should be compatible with the `tiktoken` library and support the model intended for use.
+#'
+#' Internally, the function uses `reticulate::source_python()` to source the Python script and call `count_tokens(x)`.
+#'
+#' @return A numeric value representing the number of tokens in the input text.
+#'
+#' @examples
+#' \dontrun{
+#' py_pdf_blocks("paper.pdf") |>
 #'   process_blocks() |>
 #'   purrr::pluck("full_text") |>
 #'   py_count_tokens()
-#'@export
+#' }
+#'
+#' @export
 py_count_tokens <- function(x){
   reticulate::source_python(system.file("python/count_tokens.py", package = "dpe"))
   count_tokens(x) 
 }
 
-#' Process PDF data
-#' 
-#' Extract data from pdf.
+#' Process Extracted PDF Blocks into Structured Metadata
+#'
+#' Converts a list of text blocks (typically extracted from a PDF using a tool like `py_pdf_blocks`) into structured metadata fields: DOI, JEL codes, keywords, and full text.
+#'
+#' @param pdf_blocks A list of named lists or tibbles, where each element represents a block of text from a page in a PDF document. Each block must include at least `page` and `content` fields.
+#'
+#' @details
+#' This function:
+#' \itemize{
+#'   \item Parses the DOI from page 0 using a regex pattern that detects standard DOI formats.
+#'   \item Extracts JEL classification codes and keywords from page 1.
+#'   \item Removes headers and footers from body pages to produce a clean `full_text` field.
+#'   \item Normalises line breaks within paragraphs by replacing `\n` followed by a lowercase letter with a space.
+#' }
+#'
+#' @return A named list with the following elements:
+#' \describe{
+#'   \item{doi}{A character string containing the document DOI (or `NA` if not found).}
+#'   \item{jel}{A character string of JEL classification codes (or `NA`).}
+#'   \item{keywords}{A character string of keywords (or `NA`).}
+#'   \item{full_text}{A single string containing the cleaned full text content of the document body.}
+#' }
+#'
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' blocks <- py_pdf_blocks("paper.pdf")
+#' result <- process_blocks(blocks)
+#' result$doi
+#' result$full_text
+#' }
 process_blocks <- function(pdf_blocks){
   blocks_tbl <- pdf_blocks |>
     purrr::map_df(~.x) 
@@ -232,40 +278,40 @@ process_blocks <- function(pdf_blocks){
   
   doi_regex <- "([0-9]{2}\\.[0-9]+/[0-9a-zA-Z.-]+)" 
   doi <- blocks_tbl |>
-    dplyr::filter(`page` == 0) |>
-    dplyr::filter(stringr::str_detect(content, "^To link to this")) |>
-    dplyr::pull(`content`) |>
+    dplyr::filter(.data$page == 0) |>
+    dplyr::filter(stringr::str_detect(.data$`content`, "^To link to this")) |>
+    dplyr::pull(.data$`content`) |>
     stringr::str_extract(doi_regex)
   
   jel <- blocks_tbl |>
-    dplyr::filter(`page` == 1) |>
-    dplyr::filter(stringr::str_detect(content, "^JEL CLASSIFICATION ")) |>
-    dplyr::pull(content) |>
+    dplyr::filter(.data$`page` == 1) |>
+    dplyr::filter(stringr::str_detect(.data$`content`, "^JEL CLASSIFICATION ")) |>
+    dplyr::pull(.data$`content`) |>
     stringr::str_remove('JEL CLASSIFICATION ') |>
     trimws()
   
   keywords <- blocks_tbl |>
-    dplyr::filter(`page` == 1) |>
-    dplyr::filter(stringr::str_detect(content, "^KEYWORDS")) |>
-    dplyr::pull(content) |>
+    dplyr::filter(.data$`page` == 1) |>
+    dplyr::filter(stringr::str_detect(.data$`content`, "^KEYWORDS")) |>
+    dplyr::pull(.data$`content`) |>
     stringr::str_remove('KEYWORDS') |>
     trimws()
   
   full_text <- blocks_tbl |> 
-    dplyr::filter(`page`>0) |>
-    dplyr::group_by(`page`) |>
-    dplyr::mutate(row = 1:dplyr::n()) |>
-    dplyr::mutate(header_footer = dplyr::case_when(
-      page == 1 ~ row >= max(row)-2, 
-      TRUE ~ row >= max(row)
+    dplyr::filter(.data$`page`>0) |>
+    dplyr::group_by(.data$`page`) |>
+    dplyr::mutate(`row` = 1:dplyr::n()) |>
+    dplyr::mutate(`header_footer` = dplyr::case_when(
+      .data$`page` == 1 ~ .data$`row` >= max(.data$`row`)-2, 
+      TRUE ~ .data$`row` >= max(.data$`row`)
     )) |>
     dplyr::ungroup() |>
-    dplyr::filter(!header_footer) |>
-    dplyr::summarise(text = paste(content, collapse = "\n")) |>
+    dplyr::filter(!.data$`header_footer`) |>
+    dplyr::summarise(text = paste(.data$`content`, collapse = "\n")) |>
     dplyr::pull() 
   
   # if \n is followed by a lower case letter replace it with a space
-  full_text <- stringr::str_replace_all(full_text, "\n([a-z])", " \\1")
+  full_text <- stringr::str_replace_all(.data$`full_text`, "\n([a-z])", " \\1")
   
   list(
     doi = doi,

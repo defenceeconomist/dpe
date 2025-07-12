@@ -2,16 +2,30 @@
 % Please edit documentation in R/extract_from_pdf.R
 \name{py_count_tokens}
 \alias{py_count_tokens}
-\title{Count Tokens}
+\title{Count Tokens in Text Using Python's \code{tiktoken}}
 \usage{
 py_count_tokens(x)
 }
+\arguments{
+\item{x}{A character string. The text for which token count should be calculated.}
+}
+\value{
+A numeric value representing the number of tokens in the input text.
+}
 \description{
-Use python tiktoken package to count the tokens in full text for a given model
+Counts the number of tokens in a given text string using the \code{tiktoken} Python package. This is useful for estimating token usage when interacting with language models such as GPT-4.
+}
+\details{
+This function acts as a wrapper for a Python function \code{count_tokens()} defined in \code{count_tokens.py}, which must be located in the \verb{inst/python/} directory of the \code{dpe} package. The Python script should be compatible with the \code{tiktoken} library and support the model intended for use.
+
+Internally, the function uses \code{reticulate::source_python()} to source the Python script and call \code{count_tokens(x)}.
 }
 \examples{
-py_pdf_blocks("data-raw/onedrive/2024 35 2/00-Prospects of Deterrence_ Deterrence Theory_ Representation and Evidence.pdf") |>
+\dontrun{
+py_pdf_blocks("paper.pdf") |>
   process_blocks() |>
   purrr::pluck("full_text") |>
   py_count_tokens()
+}
+
 }

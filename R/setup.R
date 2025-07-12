@@ -17,7 +17,6 @@ setup_python_env <- function(method = "virtualenv", envname = "r-myenv") {
 }
 
 install_package_requirements <- function(pkg, env = NULL) {
-  library(reticulate)
   
   if (!is.null(env)) {
     if (grepl("conda", env)) reticulate::use_condaenv(env, required = TRUE)
