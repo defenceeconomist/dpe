@@ -1,0 +1,119 @@
+---
+title: "Defence Industrial Base"
+format: html
+---
+
+```{r}
+library(ellmer)
+library(dpe)
+data(dpe_summary)
+```
+
+```{r}
+topic <- "Defence Industries & Industrial Base"
+dib_df <- dpe_summary |>
+    dplyr::filter(primary_theme == topic | secondary_theme == topic)
+```
+
+What are the key themes in the research aims across the literature?
+
+```{r}
+#| eval: false
+system_prompt = "You are an English academic research assistant."
+chat <- chat_openai(system_prompt = system_prompt)
+
+aims <- dib_df |>
+    dplyr::pull(aims) |>
+    paste(collapse = "\n")
+
+schema <- ellmer::type_object(
+    .description = glue::glue(
+        "Extract the key themes and their descriptions from",
+        "a list of __research aims__relating to {topic}.",
+        "The different research aims are delimited by \n.",
+        .sep = " "
+    ),
+    key_themes = type_array(
+    description = "Extract the key themes from the research aims", 
+    items = type_string()
+    ),
+  key_themes_description = type_array(
+    description = "Provide a description of the key theme including topics and keywords", 
+    items = type_string()
+    )
+)
+
+results <- chat$chat_structured(aims, type = schema)
+results_df <- results |>
+    dplyr::as_tibble()
+
+```
+
+
+```{r}
+#| eval: false
+schema <- ellmer::type_object(
+    .description = "Classify the provided research aim as belonging to a given theme",
+    primary_theme = ellmer::type_enum(
+        description = paste(
+            "Select the single most appropriate main theme from: ", 
+            paste(paste(results_df$key_themes, results_df$key_themes_description, sep = ": "), collapse = "\n")
+                ),
+        values = as.character(results_df$key_themes)
+        ),
+    secondary_theme = ellmer::type_enum(
+        description = paste(
+            "Optionally, select the single most appropriate main theme from: ", 
+            paste(paste(results_df$key_themes, results_df$key_themes_description, sep = ": "), collapse = "\n"),
+            "Otherwise return Null"
+            ),
+        values = as.character(results_df$key_themes),
+        required = FALSE
+        ),
+)
+
+chat <- chat_openai(system_prompt = system_prompt)
+txt_list <- purrr::map(dib_df$aims, ~.x)
+
+theme_mapping <- ellmer::parallel_chat_structured(
+  chat,
+  txt_list,
+  type = schema
+)
+
+aims_themes <- dplyr::tibble(doi = dib_df$doi, aims = dib_df$aims) |>
+    dplyr::bind_cols(theme_mapping)
+
+write.csv(aims_themes, "dib_aims_themes.csv", row.names = FALSE)
+```
+
+```{r}
+library(ggplot2)
+theme_count <- readr::read_csv("dib_aims_themes.csv") |>
+    dplyr::select(doi, primary_theme) |>
+    dplyr::group_by(primary_theme) |>
+    dplyr::count(sort = TRUE)
+ggplot(theme_count) + 
+    geom_bar(
+        aes(factor(primary_theme, rev(theme_count$primary_theme)), n),
+        stat = "identity"
+        ) +
+    coord_flip() +
+    theme_minimal() + 
+    labs(
+        x = "Theme", 
+        y = "Frequency",
+        title = "Count of Research aims by Themes",
+        subtitle = "Defence and Peace Economics Articles Relating to Defence Industrial Base (2020-2024)"
+        )
+```
+
+This code chunk: 
+
+1. Selects the papers for a given sub-theme
+2. Summarise the aims, findings and conclusions
+3. Uses Bibtext referencing
+
+```{r}
+aims_theme
+```

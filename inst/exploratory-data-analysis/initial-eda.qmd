@@ -1,0 +1,64 @@
+---
+title: "DPE Themes Exploratory Data Analysis"
+format: html
+---
+
+```{r}
+library(ggplot2)
+library(ggbump)
+library(dpe)
+data(dpe_summary)
+```
+
+The chart below shows the count of themes for articles published in Defence and Peace economics between 2020-2024.
+
+```{r}
+primary_theme_count <- dpe_summary |>
+    dplyr::select(doi, primary_theme, published.print) |>
+    dplyr::mutate(published.print = as.Date(published.print)) |>
+    dplyr::mutate(year = lubridate::year(published.print)) |>
+    dplyr::select(-published.print) |>
+    dplyr::group_by(primary_theme, year) |>
+    dplyr::summarise(n = dplyr::n(), .groups = "drop") 
+
+primary_order <- primary_theme_count |>
+    dplyr::group_by(primary_theme) |>
+    dplyr::summarise(n = sum(n)) |>
+    dplyr::arrange(n) |>
+    dplyr::pull(primary_theme)
+
+ggplot(primary_theme_count) +
+    geom_bar(aes(factor(primary_theme, levels =primary_order), n), stat = "identity") +
+    coord_flip() +
+    labs(x = "Theme", y = "Frequency") +
+    theme_minimal()
+```
+
+The chart below shows the top 10 ranked articles over time. Conflict & Civil War has been consistently the higest ranked theme. Terrorism has decreased in published articles and Defence Industries & Industrial Base, and the Economic of Alliances have increased in popularity over time.
+
+```{r}
+library(dplyr)
+rank_df <- primary_theme_count |>
+    dplyr::group_by(year) |>
+    dplyr::filter(primary_theme != "Country Surveys") |>
+    dplyr::mutate(rank = rank(-n, ties = "min")) |>
+    dplyr::ungroup() 
+
+top_ten_themes <- rank_df |>
+    dplyr::filter(rank<=10) |>
+    dplyr::group_by(primary_theme) |>
+    dplyr::filter(year == max(year)) |>
+    dplyr::arrange(rank) 
+
+rank_df |>
+    dplyr::filter(primary_theme %in% top_ten_themes$primary_theme) |> 
+    dplyr::filter(rank <= 10) |>
+    dplyr::ungroup() |>
+    ggplot(aes(year, rank, color = factor(primary_theme, levels = top_ten_themes$primary_theme))) + 
+    geom_bump() +
+    geom_point() +
+    scale_y_reverse(labels = 1:10, breaks = 1:10) +
+    theme_minimal() +
+    labs(x = "Year", y = "Rank", color = "Theme")
+    
+```
