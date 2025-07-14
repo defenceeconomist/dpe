@@ -311,7 +311,7 @@ process_blocks <- function(pdf_blocks){
     dplyr::pull() 
   
   # if \n is followed by a lower case letter replace it with a space
-  full_text <- stringr::str_replace_all(.data$`full_text`, "\n([a-z])", " \\1")
+  full_text <- stringr::str_replace_all(`full_text`, "\n([a-z])", " \\1")
   
   list(
     doi = doi,

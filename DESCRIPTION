@@ -18,7 +18,9 @@ Imports:
     shiny,
     stringr
 Suggests:
-    reactable, 
+    DBI,
+    Microsoft365R,
+    reactable,
     shinyWidgets,
     tidyr
 Depends: 
