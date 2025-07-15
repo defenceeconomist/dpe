@@ -1,0 +1,8 @@
+library(dpe)
+data(dpe_vol_31)
+data(dpe_vol_32)
+data(dpe_vol_33)
+data(dpe_vol_34)
+data(dpe_vol_35)
+dpe_summary <- dplyr::bind_rows(dpe_vol_31, dpe_vol_32, dpe_vol_33, dpe_vol_34, dpe_vol_35)
+usethis::use_data(dpe_summary)

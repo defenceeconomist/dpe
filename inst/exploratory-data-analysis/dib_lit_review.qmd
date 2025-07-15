@@ -1,7 +1,6 @@
 ---
 title: Defence Industrial Base Literature Review
 date: 15 July 25
-format: docx
 bibliography: 
     - references.bib
     - references2.bib

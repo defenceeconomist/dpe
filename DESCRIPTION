@@ -19,6 +19,7 @@ Imports:
     stringr
 Suggests:
     DBI,
+    ggbump,
     Microsoft365R,
     reactable,
     shinyWidgets,
