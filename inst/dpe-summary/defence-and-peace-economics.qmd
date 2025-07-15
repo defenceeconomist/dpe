@@ -12,16 +12,16 @@ library(reactable)
 library(shinyWidgets)
 library(dpe)
 
-data(dpe_vol_35)
+data(dpe_summary)
 data(dpe_themes)
 
-author <- dpe_vol_35 |>
+author <- dpe_summary |>
   dplyr::select(doi, author) |>
   tidyr::unnest(author) |>
   dplyr::group_by(doi) |>
   dplyr::summarise(author = paste(glue::glue("{given} {family}"), collapse = ", "))
 
-dpe_vol_35_2 <- dpe_vol_35 |>
+dpe_summary <- dpe_summary |>
   dplyr::select(-author) |>
   dplyr::left_join(author, by = "doi")
 ```
@@ -57,7 +57,7 @@ uiOutput("reactable_ui")
 #| context: server
 dataset <- reactive({
   
-  dpe_df <- dpe_vol_35_2 |>
+  dpe_df <- dpe_summary |>
       dplyr::filter(primary_theme %in% input$theme |
                     secondary_theme %in% input$theme)
   

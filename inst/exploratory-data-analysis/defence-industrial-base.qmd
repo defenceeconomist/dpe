@@ -6,6 +6,7 @@ format: html
 ```{r}
 library(ellmer)
 library(dpe)
+library(rcrossref)
 data(dpe_summary)
 ```
 
@@ -89,10 +90,13 @@ write.csv(aims_themes, "dib_aims_themes.csv", row.names = FALSE)
 
 ```{r}
 library(ggplot2)
-theme_count <- readr::read_csv("dib_aims_themes.csv") |>
+dib_aims_themes <- readr::read_csv("dib_aims_themes.csv")
+
+theme_count <-  dib_aims_themes |>
     dplyr::select(doi, primary_theme) |>
     dplyr::group_by(primary_theme) |>
     dplyr::count(sort = TRUE)
+
 ggplot(theme_count) + 
     geom_bar(
         aes(factor(primary_theme, rev(theme_count$primary_theme)), n),
@@ -114,6 +118,109 @@ This code chunk:
 2. Summarise the aims, findings and conclusions
 3. Uses Bibtext referencing
 
+
+
 ```{r}
-aims_theme
+dib_df <- dib_aims_themes |>
+    dplyr::select(doi, sub_theme_primary = primary_theme) |>
+    dplyr::left_join(dib_df, by = "doi") |>
+    dplyr::arrange(sub_theme_primary)
+```
+
+```{r}
+bibtex <- cr_cn(dib_df$doi)
+bibtex_ref <- purrr::map_chr(
+    .x = bibtex, 
+    .f = ~paste0("@",stringr::str_match(.x, "@article\\{([^,]+),")[,2])
+    ) 
+
+bibtex_df <- dplyr::tibble(
+    bibtex_citation_key = bibtex_ref, 
+    bibtex_citation = unlist(bibtex)
+    )
+```
+
+```{r}
+yaml_list <- dib_df |>
+    dplyr::bind_cols(bibtex_df) |>
+    dplyr::select(
+        sub_theme_primary, 
+        doi, 
+        aims:conclusions, 
+        bibtex_citation_key
+        ) |>
+    tidyr::pivot_longer(-c(doi, sub_theme_primary)) |>
+    dplyr::group_by(sub_theme_primary) |>
+    dplyr::group_map(
+         ~{.x |>
+            dplyr::group_by(doi) |>
+            dplyr::group_map(~{
+                as.list(tibble::deframe(.x))   
+            })
+           
+         })
+
+names(yaml_list) <- dib_df |> 
+    dplyr::distinct(sub_theme_primary) |>
+    dplyr::arrange() |>
+    dplyr::pull()
+
+yaml_list <- yaml_list |>
+    purrr::map(~yaml::as.yaml(.x))
+
+```
+
+```{r}
+library(ellmer)
+system_prompt = "You are an English academic research assistant."
+chat <- chat_openai(system_prompt = system_prompt)
+schema <- type_object(
+    .description = "Create a literature review based on the provided data",
+    lit_review = type_string(
+        description = "Summarise the aims, finding and conclusions from the provided yaml text. Use the bibtex citation key for referencing."
+    )
+)
+lit_review <- parallel_chat_structured(chat, yaml_list, schema)
+```
+
+```{r}
+
+```
+
+```{r}
+lit_review_text <- lit_review |>
+    dplyr::mutate(sub_theme_primary = dib_df |> 
+    dplyr::distinct(sub_theme_primary) |>
+    dplyr::arrange() |>
+    dplyr::pull()) |>
+    dplyr::as_tibble() |>
+    dplyr::left_join(
+        dib_df |>
+            dplyr::group_by(sub_theme_primary) |>
+            dplyr::count(), 
+        by = "sub_theme_primary"
+    ) |>
+    dplyr::arrange(-n) |>
+    purrr::pmap(function(sub_theme_primary, lit_review, ...){
+        glue::glue("# {sub_theme_primary}\n\n {lit_review}")
+    }) |>
+    unlist() |>
+    paste(collapse = "\n\n")
+
+lit_review_md <- glue::glue(
+    "---",
+    "title: 'Defence Industrial Base'",
+    "bibliography: references.bib",
+    "---\n",
+    "{lit_review_text}",
+    "# Reference",
+    .sep = "\n"
+    )
+
+write(lit_review_md, "defence-lit-review.qmd")
+```
+
+```{r}
+bibtex |> unlist() |> paste(collapse = "\n\n") |>
+    write("references.bib")
 ```
