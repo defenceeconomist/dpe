@@ -1,6 +1,7 @@
 ---
 title: "Defence Industrial Base"
 format: html
+
 ---
 
 ```{r}
@@ -138,11 +139,14 @@ bibtex_df <- dplyr::tibble(
     bibtex_citation_key = bibtex_ref, 
     bibtex_citation = unlist(bibtex)
     )
+
+dib_with_citation <- dib_df |>
+    dplyr::bind_cols(bibtex_df)
 ```
 
 ```{r}
-yaml_list <- dib_df |>
-    dplyr::bind_cols(bibtex_df) |>
+
+yaml_list <- dib_with_citation |>
     dplyr::select(
         sub_theme_primary, 
         doi, 
@@ -171,23 +175,23 @@ yaml_list <- yaml_list |>
 ```
 
 ```{r}
+#| eval: false
 library(ellmer)
-system_prompt = "You are an English academic research assistant."
+system_prompt = "You are an English academic research assistant. Output responses in UK British English."
 chat <- chat_openai(system_prompt = system_prompt)
 schema <- type_object(
     .description = "Create a literature review based on the provided data",
     lit_review = type_string(
-        description = "Summarise the aims, finding and conclusions from the provided yaml text. Use the bibtex citation key for referencing."
+        description = "Summarise the aims, finding and conclusions from the provided yaml text. Use the 'bibtex_citation_key' to cite the source, in the format (e.g., @Smith2022). Do not generate your own references. Only use the citation_key provided."
     )
 )
 lit_review <- parallel_chat_structured(chat, yaml_list, schema)
-```
-
-```{r}
+write.csv(lit_review, "lit_review_out.csv", row.names = FALSE)
 
 ```
 
 ```{r}
+lit_review <- readr::read_csv("lit_review_out.csv")
 lit_review_text <- lit_review |>
     dplyr::mutate(sub_theme_primary = dib_df |> 
     dplyr::distinct(sub_theme_primary) |>
@@ -207,6 +211,17 @@ lit_review_text <- lit_review |>
     unlist() |>
     paste(collapse = "\n\n")
 
+```
+
+```{r}
+library(ellmer)
+system_prompt = "You are an English academic research assistant. Output responses in UK British English."
+chat <- chat_openai(system_prompt = system_prompt)
+
+
+```
+
+```{r}
 lit_review_md <- glue::glue(
     "---",
     "title: 'Defence Industrial Base'",
@@ -218,6 +233,7 @@ lit_review_md <- glue::glue(
     )
 
 write(lit_review_md, "defence-lit-review.qmd")
+
 ```
 
 ```{r}

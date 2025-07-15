@@ -1,7 +1,107 @@
 ---
-title: 'Defence Industrial Base'
-bibliography: references.bib
+title: Defence Industrial Base Literature Review
+date: 15 July 25
+format: docx
+bibliography: 
+    - references.bib
+    - references2.bib
 ---
+
+```{r}
+#| include: false
+library(dpe)
+library(ggplot2)
+library(ggbump)
+library(dplyr)
+data(dpe_summary)
+```
+
+# Introduction
+
+Defence industries play a pivotal role at the intersection of national security, technological advancement and public policy. They not only underpin sovereign military capabilities, but also drive innovation, shape global markets and influence broader economic performance. This sector’s unique features—including high entry barriers, substantial R&D intensity, strong government involvement and complex procurement practices—make it an ideal subject for integrated analysis across innovation, regulation, finance and strategic autonomy.
+
+## Scope of the review
+
+This article synthesises recent literature from the Journal of Defence and Peace Economics (2020-2024) across six themes: Innovation, R&D and technology transfer; Government policy and regulation; Industry performance and productivity; Comparative case studies; Competition, consolidation and market structure; and Procurement and cost dynamics. By reviewing country‑level and cross‑regional empirical work—ranging from China, the US and Europe to Spain, Malaysia and Brazil this review captures the sector’s heterogeneity and evolving global interdependencies.
+
+## Key analytical threads
+
+Despite differing national contexts and methodologies, the literature converges around several central insights:
+
+* Innovation and R&D are critical for performance, yet returns are non‑linear and heavily dependent on optimal investment, spillover pathways and collaborative structures.
+
+* Regulatory frameworks and policy instruments significantly shape industry efficiency, competitiveness and boundary‑spanning linkages between defence and civilian sectors.
+
+* Market structures, procurement processes and financing strategies—including consolidation, offsets and cost‑management—are crucial in determining affordability, firm behaviour and strategic autonomy.
+
+* Finally, strategic autonomy remains a pressing concern, especially for Europe, where embedded supply‑chain ties and political imperatives complicate efforts to achieve self‑sufficiency in critical defence capabilities.
+
+# Data and Method for Literature Review
+
+Articles published in Defence and Peace Economics between 2020 and 2024 were classified according to the thematic framework outlined by @Gaibulloev18052020, using the OpenAI ChatGPT model in combination with the R package __ellmer__ (@ellmer_2025). A total of 30 articles were identified where Defence Industries & Industrial Base was the primary theme, with a further 14 articles where it featured as a secondary or supporting theme. Totalling 44 articles in scope for this literature review.
+
+```{r}
+#| echo: false
+#| label: fig-charts
+#| fig-cap: "Articles by Theme (Defence and Peace Economics, 2020-2024)"
+
+primary_theme_count <- dpe_summary |>
+    dplyr::select(doi, primary_theme, published.print) |>
+    dplyr::mutate(published.print = as.Date(published.print)) |>
+    dplyr::mutate(year = lubridate::year(published.print)) |>
+    dplyr::select(-published.print) |>
+    dplyr::group_by(primary_theme, year) |>
+    dplyr::summarise(n = dplyr::n(), .groups = "drop") 
+
+primary_order <- primary_theme_count |>
+    dplyr::group_by(primary_theme) |>
+    dplyr::summarise(n = sum(n)) |>
+    dplyr::arrange(n) |>
+    dplyr::pull(primary_theme)
+
+ggplot(primary_theme_count) +
+    geom_bar(aes(factor(primary_theme, levels =primary_order), n), stat = "identity") +
+    coord_flip() +
+    labs(
+        x = "Theme", y = "Frequency"
+        ) +
+    theme_minimal()
+
+```
+
+The chart below displays the top 10 themes ranked by the number of published articles over time. In the event of a tie, the higher rank (i.e. lower numerical value) is assigned. The data show that the prominence of the Defence Industries & Industrial Base theme has increased over time, rising from fourth place in 2020 to second in 2024.
+
+```{r}
+#| echo: false
+#| label: fig-charts-1
+#| fig-cap: "Top 10 Themes Ranked by Number of Articles (Defence and Peace Economics, 2020-2024)"
+rank_df <- primary_theme_count |>
+    dplyr::group_by(year) |>
+    dplyr::filter(primary_theme != "Country Surveys") |>
+    dplyr::mutate(rank = rank(-n, ties = "min")) |>
+    dplyr::ungroup() 
+
+top_ten_themes <- rank_df |>
+    dplyr::filter(rank<=10) |>
+    dplyr::group_by(primary_theme) |>
+    dplyr::filter(year == max(year)) |>
+    dplyr::arrange(rank) 
+
+rank_df |>
+    dplyr::filter(primary_theme %in% top_ten_themes$primary_theme) |> 
+    dplyr::filter(rank <= 11) |>
+    dplyr::ungroup() |>
+    ggplot(aes(year, rank, color = factor(primary_theme, levels = top_ten_themes$primary_theme))) + 
+    geom_bump() +
+    geom_point() +
+    scale_y_reverse(labels = 1:10, breaks = 1:10) +
+    theme_minimal() +
+    labs(x = "Year", y = "Rank", color = "Theme")
+```
+
+## Caveats
+
+This article demonstrates the use of Artificial Intelligence for summarising literature. The evidence base is restricted to one Journal and for a relatively recent time horizon. No assessment for the quality of the journal articles included has been made, or relevance to UK policy.
 
 # Innovation, R&D, and Technology Transfer
 
@@ -134,4 +234,5 @@ Lundmark (@Lundmark_2021) traces the historical trajectory of Sweden's defence-i
 Kleczka et al. (@Kleczka_2023) offer a quantitative assessment of the EU’s dependency on non-EU firms within the defence-industrial supply chain. The findings suggest that while non-EU ownership is widespread among leading EU defence firms, control is generally dispersed, reducing risks of concentrated foreign influence. Non-EU firms play vital roles in mergers, acquisitions, and procurement tenders, resulting in continued systemic dependency, particularly in high-value segments. The authors conclude that true EU strategic autonomy remains elusive, with further research needed on the implications of foreign ownership and strategies across different defence sectors.
 
 Collectively, these studies indicate that while European states and the EU acknowledge the need for increased strategic autonomy in defence production, deep-rooted dependencies—whether due to policy, strategic priorities, or entrenched industry structures—make achieving full autonomy a complex and costly endeavour.
-# Reference
+
+# References
