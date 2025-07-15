@@ -1,0 +1,25 @@
+---
+title: 'Offsets Literature Summary'
+bibliography: references.bib
+---
+
+The literature on defence offsets demonstrates considerable variation in aims, methods, and outcomes across different national and regional settings.
+
+Studies on Asian cases such as Malaysia (@Balakrishnan_2009) and Indonesia (@Maharani_2022) reveal that while offsets can foster limited industrial diversification, skill enhancement, and technology transfer, broader ambitions such as self-reliance, local supply chains, and genuine R&D capacity rarely materialise. In Malaysia, offsets have contributed more towards training and aerospace development than substantial industrial independence, and Indonesia's informal approaches created only isolated pockets of capability.
+
+European perspectives are critical, especially given regulatory developments. The evolution of offset practices is analysed in the contexts of EU legal and policy trends (@Matthews_2020; @Weiss_2015). Both find that EU interventions, especially the Procurement Directive and European Court of Justice jurisprudence, have led to the decline—if not the outright prohibition—of national offset requirements. This shift exemplifies the EU’s capacity to supersede member states’ sovereignty, driving movement towards a unified defence-industrial base (@Weiss_2015).
+
+Empirical case studies, such as those examining Hungary and the Czech Republic's Gripen offsets (@Lazar_2019), underline management quality, transparency, and integration with domestic industry as key to successful outcomes. Poor implementation and lack of transparency often lead to wasted resources and limited gains, as further evidenced by the South African Arms Deal (@Holden_2020), where offset multipliers permitted suppliers to claim exaggerated credit relative to actual investment, undermining promised economic impacts.
+
+A theoretical perspective is brought by @Berkok_2024, whose models demonstrate that the efficiency of offset multipliers depends on sectoral absorption capacity. Directing resources towards low-absorption sectors may inadvertently raise procurement costs. Others, such as @Kanniainen_2017, argue for recognising the insurance value of offsets in national security, as the costs and benefits are embedded in broader procurement negotiations.
+
+The network effects of offsets are also scrutinised (@Spindel_2024), illustrating that only technologically advanced states benefit substantially from direct offsets, securing favourable positions in global production networks, whilst states lacking such capability remain peripherally bound and must settle for less valuable indirect benefits.
+
+From a supply-side and industry policy view, offsets frequently raise procurement costs with ambiguous industrial benefits for the buyer and greater value accruing to exporters (@Markowski_2014). The Swiss case (@Markowski_1998) highlights a distinctive approach using offsets to support domestic industry whilst maintaining cost-effectiveness and strategic capability.
+
+Finally, offsets’ strategic and political roles are explored in the context of international technology transfers (@Hagelin_2012), where access to advanced technology is a key attraction but does not always bring about autonomy or avoid dependency.
+
+Overall, the literature suggests offsets are shaped by context: in developing or peripheral economies, their impacts are often limited and symbolic; in advanced or regulated environments, their scope is shrinking but can nonetheless offer strategic or political leverage when carefully managed and targeted.
+
+
+# Reference

@@ -1,0 +1,61 @@
+---
+title: Offsets - Initial Literature Summary
+----
+
+```{r}
+library(ellmer)
+library(rcrossref)
+```
+
+```{r}
+articles <- readRDS("data/offsets-papers-v1.RDS")|>
+    dplyr::filter(!is.na(aims))
+```
+
+```{r}
+yaml <- articles |>
+    dplyr::select(
+        doi, 
+        aims:conclusions, 
+        bibtex_citation_key
+        ) |>
+    tidyr::pivot_longer(-c(doi)) |>
+    dplyr::group_by(doi) |>
+    dplyr::group_map(~{
+        as.list(tibble::deframe(.x))
+    }) |>
+        yaml::as.yaml()
+
+```
+
+```{r}
+system_prompt = "You are an English academic research assistant. Output responses in UK British English."
+chat <- chat_openai(system_prompt = system_prompt)
+schema <- type_object(
+    .description = "Create a literature review based on the provided data",
+    lit_review = type_string(
+        description = "Summarise the aims, finding and conclusions from the provided yaml text. Use the 'bibtex_citation_key' to cite the source, in the format (e.g., @Smith2022). Do not generate your own references. Only use the citation_key provided."
+    )
+)
+lit_review <- parallel_chat_structured(chat, list(yaml = yaml), schema)
+
+```
+
+```{r}
+lit_review_md <- glue::glue(
+    "---",
+    "title: 'Offsets Literature Review'",
+    "bibliography: references.bib",
+    "---\n",
+    "{lit_review}\n",
+    "# Reference",
+    .sep = "\n"
+    )
+
+write(lit_review_md, "offsets-lit-review.qmd")
+```
+
+```{r}
+bibtex |> unlist() |> paste(collapse = "\n\n") |>
+    write("references.bib")
+```
